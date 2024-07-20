@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca - Editar Libro</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 70px;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand">Biblioteca</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span>Hola, </span><span id="username"></span><b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/editarUsuario" id="ediPer">Editar Perfil</a></li>
+                        <li class="divider"></li>
+                        <li><a href="/logout">Cerrar sesión</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-12 col-sm-9">
+            <form id="editarLibroForm">
+                <div class="form-group">
+                    <label for="tituloLib">Título:</label>
+                    <input type="text" id="tituloLib" name="tituloLib" class="form-control" required/>
+                </div>
+                <div class="form-group">
+                    <label for="codigoAut">Autor:</label>
+                    <select id="codigoAut" name="codigoAut" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="codigoEdi">Editor:</label>
+                    <select id="codigoEdi" name="codigoEdi" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="codigoGen">Categoría:</label>
+                    <select id="codigoGen" name="codigoGen" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="estadoLibros">Estado:</label>
+                    <select id="estadoLibros" name="estadoLibros" class="form-control">
+                        <option value="Habilitado">Habilitado</option>
+                        <option value="Inhabilitado">Inhabilitado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ejemplaresLib">Ejemplares:</label>
+                    <input type="number" id="ejemplaresLib" name="ejemplaresLib" class="form-control" required/>
+                </div>
+                <div class="form-group">
+                    <label for="decripcionLib">Descripción:</label>
+                    <textarea id="decripcionLib" name="decripcionLib" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="imagenLib">Imagen:</label>
+                    <input type="text" id="imagenLib" name="imagenLib" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="observaciones">Observaciones:</label>
+                    <textarea id="observaciones" name="observaciones" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="stock">Stock:</label>
+                    <input type="number" id="stock" name="stock" class="form-control" required/>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </form>
+            <a href="/libros.html" class="btn btn-secondary">Cancelar</a>
+        </div>
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+            <div class="list-group">
+                <a href="/empleado.html" class="list-group-item">Inicio</a>
+                <a href="/prestamosUsu.html" class="list-group-item">Préstamos</a>
+                <a href="/libros.html" class="list-group-item active">Libros</a>
+                <a href="/autores.html" class="list-group-item">Autores</a>
+                <a href="/editores.html" class="list-group-item">Editores</a>
+                <a href="/categorias.html" class="list-group-item">Categorías</a>
+                <a href="/usuarios.html" class="list-group-item">Usuarios</a>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <footer>
+        <p>&copy; Company 2024</p>
+    </footer>
+</div>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const libroId = urlParams.get('id');
+
+        // Cargar datos del libro a editar
+        fetch(`http://localhost:8080/api/libros/${libroId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('tituloLib').value = data.tituloLib;
+                document.getElementById('codigoAut').value = data.codigoAut.codigoAut;
+                document.getElementById('codigoEdi').value = data.codigoEdi.codigoEdi;
+                document.getElementById('codigoGen').value = data.codigoGen.codigoGen;
+                document.getElementById('estadoLibros').value = data.estadoLibros;
+                document.getElementById('ejemplaresLib').value = data.ejemplaresLib;
+                document.getElementById('decripcionLib').value = data.decripcionLib;
+                document.getElementById('imagenLib').value = data.imagenLib;
+                document.getElementById('observaciones').value = data.observaciones;
+                document.getElementById('stock').value = data.stock;
+            });
+
+        // Cargar datos de autores
+        fetch('http://localhost:8080/api/autores')
+            .then(response => response.json())
+            .then(data => {
+                const autorSelect = document.getElementById('codigoAut');
+                data.forEach(autor => {
+                    const option = document.createElement('option');
+                    option.value = autor.codigoAut;
+                    option.textContent = `${autor.nombresAut} ${autor.apeAut}`;
+                    autorSelect.appendChild(option);
+                });
+            });
+
+        // Cargar datos de editores
+        fetch('http://localhost:8080/api/editores')
+            .then(response => response.json())
+            .then(data => {
+                const editorSelect = document.getElementById('codigoEdi');
+                data.forEach(editor => {
+                    const option = document.createElement('option');
+                    option.value = editor.codigoEdi;
+                    option.textContent = editor.nomEdi;
+                    editorSelect.appendChild(option);
+                });
+            });
+
+        // Cargar datos de categorías
+        fetch('http://localhost:8080/api/categorias')
+            .then(response => response.json())
+            .then(data => {
+                const categoriaSelect = document.getElementById('codigoGen');
+                data.forEach(categoria => {
+                    const option = document.createElement('option');
+                    option.value = categoria.codigoGen;
+                    option.textContent = categoria.nombresGen;
+                    categoriaSelect.appendChild(option);
+                });
+            });
+
+        // Guardar cambios
+        document.getElementById('editarLibroForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const libroData = {
+                tituloLib: document.getElementById('tituloLib').value,
+                codigoAut: { codigoAut: document.getElementById('codigoAut').value },
+                codigoEdi: { codigoEdi: document.getElementById('codigoEdi').value },
+                codigoGen: { codigoGen: document.getElementById('codigoGen').value },
+                estadoLibros: document.getElementById('estadoLibros').value,
+                ejemplaresLib: document.getElementById('ejemplaresLib').value,
+                decripcionLib: document.getElementById('decripcionLib').value,
+                imagenLib: document.getElementById('imagenLib').value,
+                observaciones: document.getElementById('observaciones').value,
+                stock: document.getElementById('stock').value
+            };
+
+            fetch(`http://localhost:8080/api/libros/${libroId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(libroData)
+            })
+                .then(response => response.ok ? alert('Libro actualizado con éxito') : alert('Error al actualizar el libro'))
+                .then(() => window.location.href = '/libros.html');
+        });
+
+        // Obtener el nombre de usuario
+        fetch('http://localhost:8080/api/libros/username')
+            .then(response => response.text())
+            .then(username => document.getElementById('username').textContent = username);
+    });
+</script>
+</body>
+</html>

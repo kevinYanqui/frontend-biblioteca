@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Biblioteca - Editar Editor</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <script src="js/bootstrap.min.js"></script>
+  <style>
+    body {
+      padding-top: 70px;
+    }
+  </style>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand">Biblioteca</a>
+    </div>
+    <div class="collapse navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="username"></span><b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="/perfilEmpleado" id="ediPer">Editar Perfil</a></li>
+            <li class="divider"></li>
+            <li>
+              <a href="#" onclick="handleLogout()">Cerrar sesión</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row row-offcanvas row-offcanvas-right">
+    <div class="col-xs-12 col-sm-9">
+      <form id="editarEditorForm" method="POST">
+        <input type="hidden" id="codigoEdi" name="codigoEdi"/>
+        <div class="form-group">
+          <label for="nomEdi">Nombre:</label>
+          <input type="text" id="nomEdi" name="nomEdi" class="form-control" required/>
+        </div>
+        <div class="form-group">
+          <label for="direccion">Dirección:</label>
+          <input type="text" id="direccion" name="direccion" class="form-control"/>
+        </div>
+        <div class="form-group">
+          <label for="estadoEdi">Estado:</label>
+          <select id="estadoEdi" name="estadoEdi" class="form-control">
+            <option value="Habilitado">Habilitado</option>
+            <option value="Inhabilitado">Inhabilitado</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </form>
+      <a href="editores.html" class="btn btn-secondary">Cancelar</a>
+    </div>
+    <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+      <div class="list-group">
+        <a href="empleado.html" class="list-group-item">Inicio</a>
+        <a href="prestamosUsu.html" class="list-group-item">Préstamos</a>
+        <a href="libros.html" class="list-group-item">Libros</a>
+        <a href="autores.html" class="list-group-item">Autores</a>
+        <a href="editores.html" class="list-group-item active">Editores</a>
+        <a href="categorias.html" class="list-group-item">Categorías</a>
+        <a href="usuarios.html" class="list-group-item">Usuarios</a>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <footer>
+    <p>&copy; Company 2024</p>
+  </footer>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Obtener el ID del editor desde la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const editorId = urlParams.get('id');
+
+    // Comprobar si el ID se ha obtenido correctamente
+    console.log("Editor ID:", editorId);
+
+    // Obtener los datos del editor y rellenar el formulario
+    if (editorId) {
+      fetch(`http://localhost:8080/api/editores/${editorId}`)
+              .then(response => response.json())
+              .then(editor => {
+                console.log("Editor data:", editor); // Verificar los datos obtenidos
+
+                document.getElementById('codigoEdi').value = editor.codigoEdi;
+                document.getElementById('nomEdi').value = editor.nomEdi;
+                document.getElementById('direccion').value = editor.direccion;
+                document.getElementById('estadoEdi').value = editor.estadoEdi;
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
+    }
+
+    // Manejar la actualización del editor
+    document.getElementById('editarEditorForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevenir el envío predeterminado
+
+      const editorData = {
+        codigoEdi: document.getElementById('codigoEdi').value,
+        nomEdi: document.getElementById('nomEdi').value,
+        direccion: document.getElementById('direccion').value,
+        estadoEdi: document.getElementById('estadoEdi').value
+      };
+
+      fetch(`http://localhost:8080/api/editores/${editorData.codigoEdi}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(editorData)
+      })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Error en la solicitud');
+                }
+                // Redirigir a editores.html
+                window.location.href = 'editores.html';
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
+    });
+  });
+</script>
+</body>
+</html>

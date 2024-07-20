@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca - Editar Categoría</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/offcanvas.css" rel="stylesheet">
+    <link href="css/cssUsuarios.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/jquery-ui-1.10.4.css"/>
+    <script src="js/jquery-1.9.1.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/offcanvas.js"></script>
+    <style>
+        body {
+            padding-top: 70px;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand">Biblioteca</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="username"></span><b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/perfilEmpleado" id="ediPer">Editar Perfil</a></li>
+                        <li class="divider"></li>
+                        <li><a href="/logout">Cerrar sesión</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-12 col-sm-9">
+            <form id="editarCategoriaForm" method="POST">
+                <input type="hidden" id="codigoGen" name="codigoGen"/>
+                <div class="form-group">
+                    <label for="nombresGen">Nombres:</label>
+                    <input type="text" id="nombresGen" name="nombresGen" class="form-control" required/>
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcionGen">Descripción:</label>
+                    <input type="text" id="descripcionGen" name="descripcionGen" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="estadoCat">Estado:</label>
+                    <select id="estadoCat" name="estadoCat" class="form-control">
+                        <option value="Habilitado">Habilitado</option>
+                        <option value="Inhabilitado">Inhabilitado</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </form>
+            <a href="categorias.html" class="btn btn-secondary">Cancelar</a>
+        </div>
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+            <div class="list-group">
+                <a href="empleado.html" class="list-group-item">Inicio</a>
+                <a href="prestamosUsu.html" class="list-group-item">Préstamos</a>
+                <a href="libros.html" class="list-group-item">Libros</a>
+                <a href="autores.html" class="list-group-item">Autores</a>
+                <a href="editores.html" class="list-group-item">Editores</a>
+                <a href="categorias.html" class="list-group-item active">Categorías</a>
+                <a href="usuarios.html" class="list-group-item">Usuarios</a>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <footer>
+        <p>&copy; Company 2024</p>
+    </footer>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener el ID de la categoría desde la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoriaId = urlParams.get('id');
+
+        // Obtener los datos de la categoría y rellenar el formulario
+        if (categoriaId) {
+            fetch(`http://localhost:8080/api/categorias/${categoriaId}`)
+                .then(response => response.json())
+                .then(categoria => {
+                    document.getElementById('codigoGen').value = categoria.codigoGen;
+                    document.getElementById('nombresGen').value = categoria.nombresGen;
+                    document.getElementById('descripcionGen').value = categoria.descripcionGen;
+                    document.getElementById('estadoCat').value = categoria.estadoCat;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // Manejar la actualización de la categoría
+        document.getElementById('editarCategoriaForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevenir el envío predeterminado
+
+            const categoriaData = {
+                codigoGen: document.getElementById('codigoGen').value,
+                nombresGen: document.getElementById('nombresGen').value,
+                descripcionGen: document.getElementById('descripcionGen').value,
+                estadoCat: document.getElementById('estadoCat').value
+            };
+
+            fetch(`http://localhost:8080/api/categorias/${categoriaData.codigoGen}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(categoriaData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la solicitud');
+                    }
+                    // Redirigir a categorias.html
+                    window.location.href = 'categorias.html';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    });
+</script>
+</body>
+</html>

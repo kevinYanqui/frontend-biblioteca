@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca - Libros</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 70px;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand">Biblioteca</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span>Hola, </span><span id="username"></span><b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/editarUsuario.html" id="ediPer">Editar Perfil</a></li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="#" id="logout">Cerrar sesión</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-12 col-sm-9">
+            <button id="nuevoLibroBtn" class="btn btn-primary">Nuevo</button>
+            <table class="table table-bordered table-hover" style="width: 100%">
+                <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Título</th>
+                    <th>Descripción</th>
+                    <th>Observaciones</th>
+                    <th>Autores</th>
+                    <th>Categoría</th>
+                    <th>Editores</th>
+                    <th>Ejemplares</th>
+                    <th>Editar</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+                <tbody id="librosTableBody">
+                </tbody>
+            </table>
+        </div>
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+            <div class="list-group">
+                <a href="/empleado.html" class="list-group-item">Inicio</a>
+                <a href="/prestamosUsu.html" class="list-group-item">Préstamos</a>
+                <a href="/libros.html" class="list-group-item active">Libros</a>
+                <a href="/autores.html" class="list-group-item">Autores</a>
+                <a href="/editores.html" class="list-group-item">Editores</a>
+                <a href="/categorias.html" class="list-group-item">Categorías</a>
+                <a href="/usuarios.html" class="list-group-item">Usuarios</a>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <footer>
+        <p>&copy; Company 2024</p>
+    </footer>
+</div>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('http://localhost:8080/api/libros')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Libros data:', data); // Log the received data
+                const tableBody = document.getElementById('librosTableBody');
+                tableBody.innerHTML = ''; // Clear the table body
+                data.forEach(libro => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${libro.codigoLib}</td>
+                        <td>${libro.tituloLib}</td>
+                        <td>${libro.decripcionLib}</td>
+                        <td>${libro.observaciones}</td>
+                        <td>${libro.codigoAut.nombresAut} ${libro.codigoAut.apeAut}</td>
+                        <td>${libro.codigoGen.nombresGen}</td>
+                        <td>${libro.codigoEdi.nomEdi}</td>
+                        <td>${libro.ejemplaresLib}</td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="editarLibro(${libro.codigoLib})">
+                                <img src="Imagenes/Editar.png" alt="Editar" style="width: 20px; height: 20px;">
+                            </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="cambiarEstadoLibro(${libro.codigoLib}, '${libro.estadoLibros === 'Habilitado' ? 'Inhabilitado' : 'Habilitado'}')">
+                                <img src="${libro.estadoLibros === 'Habilitado' ? 'Imagenes/Inabilitar.jpg' : 'Imagenes/Habilitar.png'}" alt="Estado" style="width: 20px; height: 20px;">
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching libros:', error);
+            });
+
+        document.getElementById('nuevoLibroBtn').addEventListener('click', function () {
+            window.location.href = '/nuevoLibro.html';
+        });
+
+        const username = localStorage.getItem('username');
+        if (username) {
+            document.getElementById('username').textContent = username;
+        }
+
+        document.getElementById('logout').addEventListener('click', function (event) {
+            event.preventDefault();
+
+            fetch('http://localhost:8080/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        localStorage.removeItem('username');
+                        window.location.href = '/login.html';
+                    } else {
+                        alert('Error al cerrar sesión');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    });
+
+    function editarLibro(id) {
+        window.location.href = `/editarLibro.html?id=${id}`;
+    }
+
+    function cambiarEstadoLibro(id, estado) {
+        fetch(`http://localhost:8080/api/libros/${id}/estado?estado=${estado}`, {
+            method: 'PUT'
+        }).then(() => {
+            location.reload();
+        }).catch(error => {
+            console.error('Error updating estado:', error);
+        });
+    }
+</script>
+</body>
+</html>
